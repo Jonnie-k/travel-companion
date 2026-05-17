@@ -52,13 +52,26 @@ body {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   height: 100%;
   box-sizing: border-box;
-  text-align: center;
 }
 
 .card-section h3 {
   margin-top: 0;
   color: #ffffff;
   padding-left: 10px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wide {
+    grid-column: span 1;
+  }
+
+  .dashboard-container {
+    padding: 12px;
+  }
 }
 
 button {
