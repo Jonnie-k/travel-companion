@@ -40,6 +40,7 @@ body {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
+  align-items: stretch;
 }
 
 /* Wide sections */
@@ -55,11 +56,14 @@ body {
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .card-section h3 {
   margin-top: 0;
   color: #ffffff;
+  border-left: 4px solid #ef4444;
   padding-left: 10px;
 }
 
