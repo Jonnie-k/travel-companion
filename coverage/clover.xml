@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1779035589769" clover="3.2.0">
+  <project timestamp="1779035589769" name="All files">
+    <metrics statements="27" coveredstatements="24" conditionals="33" coveredconditionals="22" methods="9" coveredmethods="9" elements="69" coveredelements="55" complexity="0" loc="27" ncloc="27" packages="4" files="7" classes="7"/>
+    <package name="components">
+      <metrics statements="6" coveredstatements="4" conditionals="4" coveredconditionals="2" methods="1" coveredmethods="1"/>
+      <file name="ProtectedRoute.jsx" path="/home/user/Travel-companion/src/components/ProtectedRoute.jsx">
+        <metrics statements="6" coveredstatements="4" conditionals="4" coveredconditionals="2" methods="1" coveredmethods="1"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="7" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="8" count="0" type="stmt"/>
+        <line num="11" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="15" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="components.flights">
+      <metrics statements="7" coveredstatements="7" conditionals="20" coveredconditionals="12" methods="1" coveredmethods="1"/>
+      <file name="FlightCard.jsx" path="/home/user/Travel-companion/src/components/flights/FlightCard.jsx">
+        <metrics statements="7" coveredstatements="7" conditionals="20" coveredconditionals="12" methods="1" coveredmethods="1"/>
+        <line num="3" count="3" type="cond" truecount="4" falsecount="0"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="7" count="2" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
+        <line num="9" count="3" type="stmt"/>
+        <line num="10" count="3" type="cond" truecount="1" falsecount="1"/>
+        <line num="12" count="3" type="stmt"/>
+      </file>
+    </package>
+    <package name="components.ui">
+      <metrics statements="4" coveredstatements="4" conditionals="9" coveredconditionals="8" methods="3" coveredmethods="3"/>
+      <file name="ErrorMessage.jsx" path="/home/user/Travel-companion/src/components/ui/ErrorMessage.jsx">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="2" count="1" type="stmt"/>
+      </file>
+      <file name="HotelCard.jsx" path="/home/user/Travel-companion/src/components/ui/HotelCard.jsx">
+        <metrics statements="2" coveredstatements="2" conditionals="8" coveredconditionals="7" methods="1" coveredmethods="1"/>
+        <line num="2" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="4" count="3" type="stmt"/>
+      </file>
+      <file name="Loading.jsx" path="/home/user/Travel-companion/src/components/ui/Loading.jsx">
+        <metrics statements="1" coveredstatements="1" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
+        <line num="2" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="pages">
+      <metrics statements="10" coveredstatements="9" conditionals="0" coveredconditionals="0" methods="4" coveredmethods="4"/>
+      <file name="Login.jsx" path="/home/user/Travel-companion/src/pages/Login.jsx">
+        <metrics statements="6" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="12" count="0" type="stmt"/>
+        <line num="16" count="2" type="stmt"/>
+      </file>
+      <file name="Register.jsx" path="/home/user/Travel-companion/src/pages/Register.jsx">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
