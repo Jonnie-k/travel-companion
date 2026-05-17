@@ -29,43 +29,43 @@ app.get("/hotels", async (req, res) => {
   console.log("Searching hotels:", { city, checkIn, checkOut, adults });
 
   try {
-    const destRes = await axios.get(
-      "https://booking-com.p.rapidapi.com/v1/hotels/locations",
+    const locationRes = await axios.get(
+      "https://apidojo-booking-v1.p.rapidapi.com/locations/auto-complete",
       {
-        params: { name: city, locale: "en-gb" },
+        params: { text: city, languagecode: "en-us" },
         headers: {
           "X-RapidAPI-Key": RAPIDAPI_KEY,
-          "X-RapidAPI-Host": "booking-com.p.rapidapi.com",
+          "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
         },
       }
     );
 
-    const destinations = destRes.data;
-
-    if (!destinations || destinations.length === 0) {
+    const locations = locationRes.data;
+    if (!locations || locations.length === 0) {
       return res.status(404).json({ error: "Destination not found" });
     }
 
-    const dest = destinations[0];
+    const destId = locations[0].dest_id;
 
     const hotelsRes = await axios.get(
-      "https://booking-com.p.rapidapi.com/v1/hotels/search",
+      "https://apidojo-booking-v1.p.rapidapi.com/properties/v2/list",
       {
         params: {
-          dest_id: dest.dest_id,
-          dest_type: dest.dest_type,
-          checkin_date: checkIn,
-          checkout_date: checkOut,
-          adults_number: adults,
-          units: "metric",
-          locale: "en-gb",
+          offset: 0,
+          arrival_date: checkIn,
+          departure_date: checkOut,
+          guest_qty: adults,
+          dest_ids: destId,
+          room_qty: 1,
+          search_type: "city",
+          price_filter_currencycode: "USD",
           order_by: "popularity",
-          room_number: 1,
-          page_number: 0,
+          languagecode: "en-us",
+          units: "imperial",
         },
         headers: {
           "X-RapidAPI-Key": RAPIDAPI_KEY,
-          "X-RapidAPI-Host": "booking-com.p.rapidapi.com",
+          "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
         },
       }
     );
