@@ -5,14 +5,12 @@ body {
   color: #e2e8f0;
 }
 
-/* Layout */
 .dashboard-container {
   padding: 24px;
   max-width: 1200px;
   margin: auto;
 }
 
-/* Header */
 .dashboard-header {
   text-align: center;
   margin-bottom: 24px;
@@ -28,14 +26,12 @@ body {
   font-size: 18px;
 }
 
-/* No city prompt */
 .no-city {
   text-align: center;
   margin-top: 40px;
   color: #94a3b8;
 }
 
-/* Grid layout */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -43,12 +39,10 @@ body {
   align-items: stretch;
 }
 
-/* Wide sections */
 .wide {
   grid-column: span 2;
 }
 
-/* Cards */
 .card-section {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -58,16 +52,15 @@ body {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   height: 100%;
   box-sizing: border-box;
+  text-align: center;
 }
 
 .card-section h3 {
   margin-top: 0;
   color: #ffffff;
-  border-left: 4px solid #ef4444;
   padding-left: 10px;
 }
 
-/* Buttons */
 button {
   background: #1d4ed8;
   border: none;
@@ -83,7 +76,6 @@ button:hover {
   transform: scale(1.03);
 }
 
-/* Inputs */
 input {
   padding: 10px;
   border-radius: 8px;
@@ -92,7 +84,6 @@ input {
   margin: 5px;
 }
 
-/* Login Page */
 .login-page {
   height: 100vh;
   display: flex;
@@ -128,7 +119,6 @@ input {
   transform: scale(1.03);
 }
 
-/* Navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -162,7 +152,6 @@ input {
   color: #ef4444;
 }
 
-/* Flight & Hotel Cards */
 .flight-card,
 .hotel-card {
   background: rgba(255, 255, 255, 0.07);
@@ -170,7 +159,7 @@ input {
   border-radius: 14px;
   margin-top: 10px;
   transition: 0.2s ease;
-  border-left: 3px solid #ef4444;
+  text-align: left;
 }
 
 .flight-card:hover,

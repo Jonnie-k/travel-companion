@@ -5,7 +5,7 @@ function HotelCard({ hotel }) {
     <div className="hotel-card">
       <div className="hotel-info">
         <h3>{hotel.name}</h3>
-        {hotel.country && <p>📍 {hotel.region ? `${hotel.region}, ` : ""}{hotel.country}</p>}
+        {hotel.country && <p>{hotel.region ? `${hotel.region}, ` : ""}{hotel.country}</p>}
         {hotel.type && (
           <p style={{ textTransform: "capitalize", color: "#666" }}>
             {hotel.type}

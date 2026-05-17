@@ -201,7 +201,7 @@ function Dashboard() {
           </section>
 
           {/* ── ITINERARY ────────────────────────────────────────────── */}
-          <section className="card-section">
+          <section className="card-section wide">
             <h3>Trip Planner</h3>
             <ItineraryPlanner />
           </section>

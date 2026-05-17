@@ -30,7 +30,7 @@ function CountryInfo({ countryCode }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // ✅ Only fetch when we have a valid 2-letter country code from weather
+    // Only fetch when we have a valid 2-letter country code from weather
     if (!countryCode || countryCode.length > 3) return;
 
     async function loadCountry() {
@@ -48,9 +48,9 @@ function CountryInfo({ countryCode }) {
     }
 
     loadCountry();
-  }, [countryCode]); // ✅ only depends on countryCode, not city
+  }, [countryCode]); //only depends on countryCode, not city
 
-  // ✅ Wait silently until weather loads and provides countryCode
+  // Wait silently until weather loads and provides countryCode
   if (!countryCode) return <p className="empty">Loading country data...</p>;
   if (loading) return <p>Loading country info...</p>;
   if (error) return <p className="empty">{error}</p>;
