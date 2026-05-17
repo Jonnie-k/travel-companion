@@ -29,62 +29,66 @@ app.get("/hotels", async (req, res) => {
   console.log("Searching hotels:", { city, checkIn, checkOut, adults });
 
   try {
-    const locationRes = await axios.get(
-      "https://apidojo-booking-v1.p.rapidapi.com/locations/auto-complete",
+    const destRes = await axios.get(
+      "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchDestination",
       {
-        params: { text: city, languagecode: "en-us" },
+        params: { query: city },
         headers: {
           "X-RapidAPI-Key": RAPIDAPI_KEY,
-          "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
+          "X-RapidAPI-Host": "booking-com15.p.rapidapi.com",
         },
       }
     );
 
-    const locations = locationRes.data;
-    if (!locations || locations.length === 0) {
+    const destinations = destRes.data?.data;
+
+    if (!destinations || destinations.length === 0) {
       return res.status(404).json({ error: "Destination not found" });
     }
 
-    const destId = locations[0].dest_id;
+    const dest = destinations[0];
 
     const hotelsRes = await axios.get(
-      "https://apidojo-booking-v1.p.rapidapi.com/properties/v2/list",
+      "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels",
       {
         params: {
-          offset: 0,
+          dest_id: dest.dest_id,
+          search_type: dest.search_type,
           arrival_date: checkIn,
           departure_date: checkOut,
-          guest_qty: adults,
-          dest_ids: destId,
+          adults: adults,
           room_qty: 1,
-          search_type: "city",
-          price_filter_currencycode: "USD",
-          order_by: "popularity",
+          page_number: 1,
+          units: "metric",
+          temperature_unit: "c",
           languagecode: "en-us",
-          units: "imperial",
+          currency_code: "USD",
         },
         headers: {
           "X-RapidAPI-Key": RAPIDAPI_KEY,
-          "X-RapidAPI-Host": "apidojo-booking-v1.p.rapidapi.com",
+          "X-RapidAPI-Host": "booking-com15.p.rapidapi.com",
         },
       }
     );
 
-    const hotels = hotelsRes.data.result;
+    const hotels = hotelsRes.data?.data?.hotels;
 
     if (!hotels || hotels.length === 0) {
       return res.status(404).json({ error: "No hotels found" });
     }
 
-    const results = hotels.slice(0, 5).map((h) => ({
-      id: h.hotel_id,
-      name: h.hotel_name,
-      type: "hotel",
-      country: h.country_trans,
-      region: h.city_trans,
-      label: h.hotel_name,
-      bookingUrl: h.url,
-    }));
+    const results = hotels
+  .filter((h) => h.property?.name)
+  .slice(0, 5)
+  .map((h) => ({
+    id: h.hotel_id,
+    name: h.property?.name,
+    type: "hotel",
+    country: h.property?.countryCode,
+    region: city,
+    label: h.property?.name,
+    bookingUrl: `https://www.booking.com/hotel/${h.property?.countryCode}/${h.hotel_id}.html`,
+  }));
 
     res.json(results);
   } catch (error) {
