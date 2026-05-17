@@ -1,8 +1,14 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Register() {
-  return (
-    <div className="page center">
-      <h1>Registration handled through Google Auth</h1>
-    </div>
-  );
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate("/login", { replace: true });
+  }, [navigate]);
+
+  return null;
 }
+
 export default Register;
