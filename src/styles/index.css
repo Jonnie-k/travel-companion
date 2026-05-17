@@ -1,0 +1,187 @@
+body {
+  margin: 0;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background: linear-gradient(135deg, #1e3a5f, #1e293b);
+  color: #e2e8f0;
+}
+
+/* Layout */
+.dashboard-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* Header */
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.city-title {
+  color: #38bdf8;
+  font-size: 18px;
+}
+
+/* No city prompt */
+.no-city {
+  text-align: center;
+  margin-top: 40px;
+  color: #94a3b8;
+}
+
+/* Grid layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* Wide sections */
+.wide {
+  grid-column: span 2;
+}
+
+/* Cards */
+.card-section {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.card-section h3 {
+  margin-top: 0;
+  color: #ffffff;
+  padding-left: 10px;
+}
+
+/* Buttons */
+button {
+  background: #1d4ed8;
+  border: none;
+  padding: 10px 16px;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+button:hover {
+  background: #ef4444;
+  transform: scale(1.03);
+}
+
+/* Inputs */
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  margin: 5px;
+}
+
+/* Login Page */
+.login-page {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, #1e293b, #0f172a);
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  width: 320px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.login-card h1 {
+  margin-bottom: 10px;
+}
+
+.google-btn {
+  width: 100%;
+  margin-top: 20px;
+  background: #fff;
+  color: #111;
+  font-weight: bold;
+}
+
+.google-btn:hover {
+  background: #f1f5f9;
+  transform: scale(1.03);
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background: #0c1829;
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid #1e40af;
+}
+
+.navbar h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #38bdf8;
+}
+
+.navbar h2 {
+  margin: 0;
+  font-size: 14px;
+  color: #93c5fd;
+}
+
+.nav-links a {
+  color: #e2e8f0;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  color: #ef4444;
+}
+
+/* Flight & Hotel Cards */
+.flight-card,
+.hotel-card {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 14px;
+  border-radius: 14px;
+  margin-top: 10px;
+  transition: 0.2s ease;
+  border-left: 3px solid #ef4444;
+}
+
+.flight-card:hover,
+.hotel-card:hover {
+  transform: translateY(-4px);
+}
+
+.flight-card h4,
+.hotel-card h4 {
+  margin: 0;
+  color: #ffffff;
+}
+
+.flight-card p,
+.hotel-card p {
+  margin: 4px 0;
+  color: #e2e8f0;
+}
