@@ -1,3 +1,4 @@
+
 import express from "express";
 import axios from "axios";
 import cors from "cors";
@@ -86,8 +87,15 @@ app.get("/hotels", async (req, res) => {
     type: "hotel",
     country: h.property?.countryCode,
     region: city,
-    label: h.property?.name,
-    bookingUrl: `https://www.booking.com/hotel/${h.property?.countryCode}/${h.hotel_id}.html`,
+    reviewScore: h.property?.reviewScore,
+    reviewCount: h.property?.reviewCount,
+    reviewScoreWord: h.property?.reviewScoreWord,
+    price: h.property?.priceBreakdown?.grossPrice?.value,
+    currency: h.property?.priceBreakdown?.grossPrice?.currency,
+    photo: h.property?.photoUrls?.[0],
+    checkin: h.property?.checkinDate,
+    checkout: h.property?.checkoutDate,
+    propertyClass: h.property?.propertyClass,
   }));
 
     res.json(results);
