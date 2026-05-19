@@ -14,31 +14,70 @@ import ItineraryPlanner from "../components/ui/ItineraryPlanner";
 import Loading from "../components/ui/Loading";
 import ErrorMessage from "../components/ui/ErrorMessage";
 import ErrorBoundary from "../components/ui/ErrorBoundary";
+import { db } from "../firebase/config";
+import { useAuth } from "../context/AuthContext";
+import {
+  doc,
+  setDoc,
+  getDoc,
+} from "firebase/firestore";
 
 function Dashboard() {
   const [params] = useSearchParams();
   const city = (params.get("city") || "").trim();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
-  // City search state
   const [cityInput, setCityInput] = useState("");
 
-  // Weather state
   const [weatherData, setWeatherData] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState("");
 
-  // Flight state
   const [flightResults, setFlightResults] = useState([]);
   const [flightLoading, setFlightLoading] = useState(false);
   const [flightError, setFlightError] = useState("");
 
-  // Hotel state
   const [hotelResults, setHotelResults] = useState([]);
   const [hotelLoading, setHotelLoading] = useState(false);
   const [hotelError, setHotelError] = useState("");
 
-  // ─── City search ──────────────────────────────────────────────────────
+  // Load persisted from Firestore.
+  useEffect(() => {
+    if (!currentUser) return;
+
+    async function loadPersistedData() {
+      try {
+        const docRef = doc(db, "searchResults", currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.flightResults) setFlightResults(data.flightResults);
+          if (data.hotelResults) setHotelResults(data.hotelResults);
+        }
+      } catch (error) {
+        console.error("Error loading persisted data:", error);
+      }
+    }
+
+    loadPersistedData();
+  }, [currentUser]);
+
+  //Saving results to Firestore 
+  async function saveResults(flights, hotels) {
+    if (!currentUser) return;
+    try {
+      await setDoc(doc(db, "searchResults", currentUser.uid), {
+        flightResults: flights,
+        hotelResults: hotels,
+        updatedAt: new Date(),
+      });
+    } catch (error) {
+      console.error("Error saving results:", error);
+    }
+  }
+
+  // searching for city
   function handleCitySearch(e) {
     e.preventDefault();
     const trimmed = cityInput.trim();
@@ -46,7 +85,7 @@ function Dashboard() {
     navigate(`/dashboard?city=${encodeURIComponent(trimmed)}`);
   }
 
-  // ─── Weather: loads automatically when city changes ───────────────────
+  //loading weather data when city changes
   useEffect(() => {
     if (!city) {
       setWeatherData(null);
@@ -75,7 +114,7 @@ function Dashboard() {
     loadWeather();
   }, [city]);
 
-  // ─── Flights: triggered by FlightSearchForm ───────────────────────────
+  //Getting flights
   async function handleFlightSearch({ origin, destination, date, passengers }) {
     setFlightLoading(true);
     setFlightError("");
@@ -94,6 +133,7 @@ function Dashboard() {
         setFlightError("No flights found for this route.");
       } else {
         setFlightResults(validResults);
+        await saveResults(validResults, hotelResults);
       }
     } catch (err) {
       setFlightError(err.message || "Flight search failed. Please try again.");
@@ -102,7 +142,7 @@ function Dashboard() {
     }
   }
 
-  // ─── Hotels: triggered by HotelSearchForm ────────────────────────────
+  //Hotel information
   async function handleHotelSearch({ checkIn, checkOut, adults }) {
     setHotelLoading(true);
     setHotelError("");
@@ -118,6 +158,7 @@ function Dashboard() {
         setHotelError("No hotels found for this destination.");
       } else {
         setHotelResults(results);
+        await saveResults(flightResults, results);
       }
     } catch (err) {
       setHotelError(err.message || "Hotel search failed. Please try again.");
@@ -128,11 +169,8 @@ function Dashboard() {
 
   return (
     <div className="dashboard-container">
-
-      {/* ── HEADER with city search ──────────────────────────────────── */}
       <header className="dashboard-header">
         <h1>Travel Dashboard</h1>
-
         <form onSubmit={handleCitySearch} className="dashboard-search">
           <input
             type="text"
@@ -142,20 +180,16 @@ function Dashboard() {
           />
           <button type="submit">Search</button>
         </form>
-
         {city && <h2 className="city-title">{city}</h2>}
       </header>
 
-      {/* ── DASHBOARD GRID ───────────────────────────────────────────── */}
       {!city ? (
-        // Show prompt when no city is selected yet
         <div className="no-city">
           <p>Enter a city above to view travel insights.</p>
         </div>
       ) : (
         <div className="dashboard-grid">
 
-          {/* ── WEATHER ──────────────────────────────────────────────── */}
           <section className="card-section">
             <h3>Weather</h3>
             {weatherLoading && <Loading message="Loading weather..." />}
@@ -165,22 +199,16 @@ function Dashboard() {
             )}
           </section>
 
-          {/* ── COUNTRY INFO ─────────────────────────────────────────── */}
           <section className="card-section">
             <h3>Country Info</h3>
-            <CountryInfo
-              city={city}
-              countryCode={weatherData?.country}
-            />
+            <CountryInfo city={city} countryCode={weatherData?.country} />
           </section>
 
-          {/* ── MAP ──────────────────────────────────────────────────── */}
           <section className="card-section wide">
             <h3>Map</h3>
             <MapView city={city} />
           </section>
 
-          {/* ── HOTELS ───────────────────────────────────────────────── */}
           <section className="card-section wide">
             <h3>Hotels</h3>
             <HotelSearchForm onSearch={handleHotelSearch} />
@@ -200,13 +228,11 @@ function Dashboard() {
             )}
           </section>
 
-          {/* ── ITINERARY ────────────────────────────────────────────── */}
           <section className="card-section wide">
             <h3>Trip Planner</h3>
             <ItineraryPlanner />
           </section>
 
-          {/* ── FLIGHTS ──────────────────────────────────────────────── */}
           <section className="card-section wide">
             <h3>Flights</h3>
             <FlightSearchForm onSearch={handleFlightSearch} />
