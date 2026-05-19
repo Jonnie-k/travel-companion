@@ -18,35 +18,57 @@ function ItineraryPlanner() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!currentUser) return;
+    let unsubscribe;
 
-    const q = query(
-      collection(db, "itineraries"),
-      where("userId", "==", currentUser.uid)
-    );
-
-    // Added an error callback function as the third argument to onSnapshot
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const items = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setActivities(items);
+    async function initListener() {
+      // If user is not logged in, reset state and exit safely
+      if (!currentUser) {
+        setActivities([]);
         setLoading(false);
-      },
-      (error) => {
-        // Intercepts connection/cache drops gracefully
-        console.warn("Itinerary Planner stream offline/unreachable:", error.message);
-        
-        // Stops the loading screen from spinning indefinitely
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        const q = query(
+          collection(db, "itineraries"),
+          where("userId", "==", currentUser.uid)
+        );
+
+        unsubscribe = onSnapshot(
+          q,
+          (snapshot) => {
+            const items = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+
+            setActivities(items);
+            setLoading(false);
+          },
+          (error) => {
+            console.warn(
+              "Itinerary Planner stream offline/unreachable:",
+              error.message
+            );
+
+            setActivities([]);
+            setLoading(false);
+          }
+        );
+      } catch (error) {
+        console.error("Failed to initialize Firestore listener:", error);
         setActivities([]);
         setLoading(false);
       }
-    );
+    }
 
-    return () => unsubscribe();
+    initListener();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [currentUser]);
 
   async function addActivity() {
@@ -59,6 +81,7 @@ function ItineraryPlanner() {
         userId: currentUser.uid,
         createdAt: new Date(),
       });
+
       setActivity("");
     } catch (error) {
       console.error("Error adding activity:", error);
@@ -74,7 +97,9 @@ function ItineraryPlanner() {
   }
 
   function handleKeyDown(e) {
-    if (e.key === "Enter") addActivity();
+    if (e.key === "Enter") {
+      addActivity();
+    }
   }
 
   return (
@@ -89,6 +114,7 @@ function ItineraryPlanner() {
           onChange={(e) => setActivity(e.target.value)}
           onKeyDown={handleKeyDown}
         />
+
         <button onClick={addActivity}>Add</button>
       </div>
 
