@@ -16,10 +16,6 @@ app.use(express.json());
 const DUFFEL_TOKEN = process.env.DUFFEL_TOKEN;
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 
-app.get("/", (req, res) => {
-  res.json({ message: "Backend running smoothly!" });
-});
-
 app.get("/hotels", async (req, res) => {
   const { city, checkIn, checkOut, adults = 1 } = req.query;
 
@@ -30,73 +26,69 @@ app.get("/hotels", async (req, res) => {
   console.log("Searching hotels:", { city, checkIn, checkOut, adults });
 
   try {
+    // Step 1: Get destination ID
     const destRes = await axios.get(
-      "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchDestination",
+      "https://hotels-com-provider.p.rapidapi.com/v2/regions",
       {
-        params: { query: city },
+        params: { query: city, locale: "en_US", domain: "US" },
         headers: {
           "X-RapidAPI-Key": RAPIDAPI_KEY,
-          "X-RapidAPI-Host": "booking-com15.p.rapidapi.com",
+          "X-RapidAPI-Host": "hotels-com-provider.p.rapidapi.com",
         },
       }
     );
 
-    const destinations = destRes.data?.data;
+    const region = destRes.data?.data?.find(
+      (r) => r.type === "CITY" || r.type === "NEIGHBORHOOD"
+    ) || destRes.data?.data?.[0];
 
-    if (!destinations || destinations.length === 0) {
+    if (!region) {
       return res.status(404).json({ error: "Destination not found" });
     }
 
-    const dest = destinations[0];
-
+    // Step 2: Search hotels
     const hotelsRes = await axios.get(
-      "https://booking-com15.p.rapidapi.com/api/v1/hotels/searchHotels",
+      "https://hotels-com-provider.p.rapidapi.com/v2/hotels/search",
       {
         params: {
-          dest_id: dest.dest_id,
-          search_type: dest.search_type,
-          arrival_date: checkIn,
-          departure_date: checkOut,
-          adults: adults,
-          room_qty: 1,
-          page_number: 1,
-          units: "metric",
-          temperature_unit: "c",
-          languagecode: "en-us",
-          currency_code: "USD",
+          region_id: region.gaiaId,
+          locale: "en_US",
+          checkin_date: checkIn,
+          checkout_date: checkOut,
+          adults_number: adults,
+          domain: "US",
+          sort_order: "REVIEW",
+          star_rating_ids: "3,4,5",
+          page_number: "1",
         },
         headers: {
           "X-RapidAPI-Key": RAPIDAPI_KEY,
-          "X-RapidAPI-Host": "booking-com15.p.rapidapi.com",
+          "X-RapidAPI-Host": "hotels-com-provider.p.rapidapi.com",
         },
       }
     );
 
-    const hotels = hotelsRes.data?.data?.hotels;
+    const hotels = hotelsRes.data?.properties;
 
     if (!hotels || hotels.length === 0) {
       return res.status(404).json({ error: "No hotels found" });
     }
 
-    const results = hotels
-  .filter((h) => h.property?.name)
-  .slice(0, 5)
-  .map((h) => ({
-    id: h.hotel_id,
-    name: h.property?.name,
-    type: "hotel",
-    country: h.property?.countryCode,
-    region: city,
-    reviewScore: h.property?.reviewScore,
-    reviewCount: h.property?.reviewCount,
-    reviewScoreWord: h.property?.reviewScoreWord,
-    price: h.property?.priceBreakdown?.grossPrice?.value,
-    currency: h.property?.priceBreakdown?.grossPrice?.currency,
-    photo: h.property?.photoUrls?.[0],
-    checkin: h.property?.checkinDate,
-    checkout: h.property?.checkoutDate,
-    propertyClass: h.property?.propertyClass,
-  }));
+    const results = hotels.slice(0, 5).map((h) => ({
+      id: h.id,
+      name: h.name,
+      type: "hotel",
+      region: city,
+      reviewScore: h.reviews?.score,
+      reviewCount: h.reviews?.total,
+      reviewScoreWord: h.reviews?.localizedAdvisory,
+      price: h.price?.lead?.amount,
+      currency: h.price?.lead?.currencyInfo?.code,
+      photo: h.propertyImage?.image?.url,
+      checkin: checkIn,
+      checkout: checkOut,
+      propertyClass: h.star,
+    }));
 
     res.json(results);
   } catch (error) {
