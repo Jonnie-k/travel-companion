@@ -20,6 +20,7 @@ import {
   doc,
   setDoc,
   getDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 
 function Dashboard() {
@@ -42,8 +43,7 @@ function Dashboard() {
   const [hotelLoading, setHotelLoading] = useState(false);
   const [hotelError, setHotelError] = useState("");
 
-  // Load persisted from Firestore.
-  // Load persisted from Firestore.
+  // Load persisted search results from Firestore on mount
   useEffect(() => {
     if (!currentUser) return;
 
@@ -51,17 +51,17 @@ function Dashboard() {
       try {
         const docRef = doc(db, "searchResults", currentUser.uid);
         const docSnap = await getDoc(docRef);
-        
+
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.flightResults) setFlightResults(data.flightResults);
           if (data.hotelResults) setHotelResults(data.hotelResults);
         }
       } catch (error) {
-        // 👇 Catching it cleanly prevents the blank white screen of death
-        console.warn("Firestore offline/unavailable. Defaulting to fresh search states.", error);
-        
-        // Fallback: Ensure your application doesn't get stuck in a partial loading trap
+        console.warn(
+          "Firestore unavailable. Starting with empty state.",
+          error
+        );
         setFlightResults([]);
         setHotelResults([]);
       }
@@ -69,21 +69,22 @@ function Dashboard() {
 
     loadPersistedData();
   }, [currentUser]);
-  //Saving results to Firestore 
+
+  // Save results to Firestore
   async function saveResults(flights, hotels) {
     if (!currentUser) return;
     try {
       await setDoc(doc(db, "searchResults", currentUser.uid), {
         flightResults: flights,
         hotelResults: hotels,
-        updatedAt: new Date(),
+        updatedAt: serverTimestamp(), // fixed: use serverTimestamp
       });
     } catch (error) {
-      console.error("Error saving results:", error);
+      console.error("Error saving results to Firestore:", error);
     }
   }
 
-  // searching for city
+  // City search
   function handleCitySearch(e) {
     e.preventDefault();
     const trimmed = cityInput.trim();
@@ -91,7 +92,7 @@ function Dashboard() {
     navigate(`/dashboard?city=${encodeURIComponent(trimmed)}`);
   }
 
-  //loading weather data when city changes
+  // Load weather when city changes
   useEffect(() => {
     if (!city) {
       setWeatherData(null);
@@ -120,18 +121,13 @@ function Dashboard() {
     loadWeather();
   }, [city]);
 
-  //Getting flights
+  // Flight search
   async function handleFlightSearch({ origin, destination, date, passengers }) {
     setFlightLoading(true);
     setFlightError("");
     setFlightResults([]);
     try {
-      const results = await searchFlights({
-        origin,
-        destination,
-        date,
-        passengers,
-      });
+      const results = await searchFlights({ origin, destination, date, passengers });
       const validResults = results.filter(
         (f) => f && f.slices && f.slices.length > 0
       );
@@ -148,18 +144,13 @@ function Dashboard() {
     }
   }
 
-  //Hotel information
+  // Hotel search
   async function handleHotelSearch({ checkIn, checkOut, adults }) {
     setHotelLoading(true);
     setHotelError("");
     setHotelResults([]);
     try {
-      const results = await searchHotels({
-        city,
-        checkIn,
-        checkOut,
-        adults,
-      });
+      const results = await searchHotels({ city, checkIn, checkOut, adults });
       if (!results || results.length === 0) {
         setHotelError("No hotels found for this destination.");
       } else {

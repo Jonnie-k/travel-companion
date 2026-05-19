@@ -7,7 +7,6 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
 app.use(
   cors({
     origin: [
@@ -19,7 +18,6 @@ app.use(
 
 app.use(express.json());
 
-// Environment Variables
 const DUFFEL_TOKEN = process.env.DUFFEL_TOKEN;
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 
@@ -28,33 +26,20 @@ app.get("/", (req, res) => {
   res.send("Travel Companion API is running");
 });
 
-   //HOTELS ROUTE
-
+// HOTELS ROUTE
 app.get("/hotels", async (req, res) => {
-  const {
-    city,
-    checkIn,
-    checkOut,
-    adults = 1,
-  } = req.query;
+  const { city, checkIn, checkOut, adults = 1 } = req.query;
 
-  // Validation
   if (!city || !checkIn || !checkOut) {
     return res.status(400).json({
       error: "city, checkIn and checkOut are required",
     });
   }
 
-  console.log("Searching hotels:", {
-    city,
-    checkIn,
-    checkOut,
-    adults,
-  });
+  console.log("Searching hotels:", { city, checkIn, checkOut, adults });
 
   try {
-       //Getting destination/region ID
-
+    // Get destination/region ID
     const destinationResponse = await axios.get(
       "https://hotels-com-provider.p.rapidapi.com/v2/regions",
       {
@@ -65,37 +50,26 @@ app.get("/hotels", async (req, res) => {
         },
         headers: {
           "X-RapidAPI-Key": RAPIDAPI_KEY,
-          "X-RapidAPI-Host":
-            "hotels-com-provider.p.rapidapi.com",
+          "X-RapidAPI-Host": "hotels-com-provider.p.rapidapi.com",
         },
+        timeout: 30000,
       }
     );
 
-    console.log(
-      "Destination API Response:",
-      destinationResponse.data
-    );
+    console.log("Destination API Response:", destinationResponse.data);
 
     const regions = destinationResponse.data?.data || [];
-
     const region =
-      regions.find(
-        (r) =>
-          r.type === "CITY" ||
-          r.type === "NEIGHBORHOOD"
-      ) || regions[0];
+      regions.find((r) => r.type === "CITY" || r.type === "NEIGHBORHOOD") ||
+      regions[0];
 
     if (!region) {
-      return res.status(404).json({
-        error: "Destination not found",
-      });
+      return res.status(404).json({ error: "Destination not found" });
     }
 
     console.log("Selected region:", region);
 
-    
-       //Hotel search
-
+    // Hotel search
     const hotelsResponse = await axios.get(
       "https://hotels-com-provider.p.rapidapi.com/v2/hotels/search",
       {
@@ -112,47 +86,32 @@ app.get("/hotels", async (req, res) => {
         },
         headers: {
           "X-RapidAPI-Key": RAPIDAPI_KEY,
-          "X-RapidAPI-Host":
-            "hotels-com-provider.p.rapidapi.com",
+          "X-RapidAPI-Host": "hotels-com-provider.p.rapidapi.com",
         },
+        timeout: 30000,
       }
     );
 
-    console.log(
-      "Hotels API Response:",
-      hotelsResponse.data
-    );
+    console.log("Hotels API Response:", hotelsResponse.data);
 
-    const hotels =
-      hotelsResponse.data?.properties || [];
+    const hotels = hotelsResponse.data?.properties || [];
 
     if (hotels.length === 0) {
-      return res.status(404).json({
-        error: "No hotels found",
-      });
+      return res.status(404).json({ error: "No hotels found" });
     }
-
 
     const results = hotels.slice(0, 5).map((hotel) => ({
       id: hotel.id,
       name: hotel.name,
       type: "hotel",
       region: city,
-
       reviewScore: hotel.reviews?.score || null,
       reviewCount: hotel.reviews?.total || 0,
-      reviewScoreWord:
-        hotel.reviews?.localizedAdvisory || null,
-
+      reviewScoreWord: hotel.reviews?.localizedAdvisory || null,
       price: hotel.price?.lead?.amount || null,
-      currency:
-        hotel.price?.lead?.currencyInfo?.code || "USD",
-
-      photo:
-        hotel.propertyImage?.image?.url || null,
-
+      currency: hotel.price?.lead?.currencyInfo?.code || "USD",
+      photo: hotel.propertyImage?.image?.url || null,
       propertyClass: hotel.star || null,
-
       checkin: checkIn,
       checkout: checkOut,
     }));
@@ -163,61 +122,38 @@ app.get("/hotels", async (req, res) => {
     console.log(error.response?.data);
     console.log(error.message);
 
-    return res.status(500).json({
-      error: "Failed to fetch hotels",
-    });
+    if (error.code === "ECONNABORTED") {
+      return res.status(504).json({ error: "Hotels request timed out" });
+    }
+
+    return res.status(500).json({ error: "Failed to fetch hotels" });
   }
 });
 
-   //FLIGHTS
-
+// FLIGHTS ROUTE
 app.post("/flights", async (req, res) => {
-  const {
-    origin,
-    destination,
-    date,
-    passengers,
-  } = req.body;
+  const { origin, destination, date, passengers } = req.body;
 
-  // Validation
   if (!origin || !destination || !date) {
     return res.status(400).json({
-      error:
-        "origin, destination, and date are required",
+      error: "origin, destination, and date are required",
     });
   }
 
-  const passengerCount =
-    parseInt(passengers) || 1;
+  const passengerCount = parseInt(passengers) || 1;
+  const passengerList = Array.from({ length: passengerCount }, () => ({
+    type: "adult",
+  }));
 
-  const passengerList = Array.from(
-    { length: passengerCount },
-    () => ({
-      type: "adult",
-    })
-  );
-
-  console.log("Searching flights:", {
-    origin,
-    destination,
-    date,
-    passengerCount,
-  });
+  console.log("Searching flights:", { origin, destination, date, passengerCount });
 
   try {
-     // Create offer request
-
+    // Create offer request
     const offerRequest = await axios.post(
       "https://api.duffel.com/air/offer_requests",
       {
         data: {
-          slices: [
-            {
-              origin,
-              destination,
-              departure_date: date,
-            },
-          ],
+          slices: [{ origin, destination, departure_date: date }],
           passengers: passengerList,
         },
       },
@@ -228,19 +164,14 @@ app.post("/flights", async (req, res) => {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
+        timeout: 30000,
       }
     );
 
-    const offerRequestId =
-      offerRequest.data.data.id;
+    const offerRequestId = offerRequest.data.data.id;
+    console.log("Offer Request ID:", offerRequestId);
 
-    console.log(
-      "Offer Request ID:",
-      offerRequestId
-    );
-
-       //Get flight 
-
+    // Get flights
     const offersResponse = await axios.get(
       `https://api.duffel.com/air/offers?offer_request_id=${offerRequestId}`,
       {
@@ -248,29 +179,27 @@ app.post("/flights", async (req, res) => {
           Authorization: `Bearer ${DUFFEL_TOKEN}`,
           "Duffel-Version": "v2",
         },
+        timeout: 30000,
       }
     );
 
-    console.log(
-      "Flights found:",
-      offersResponse.data.data.length
-    );
-
+    console.log("Flights found:", offersResponse.data.data.length);
     return res.json(offersResponse.data.data);
   } catch (error) {
     console.log("FLIGHTS ERROR:");
     console.log(error.response?.data);
     console.log(error.message);
 
-    return res.status(500).json({
-      error: "Flight search failed",
-    });
+    if (error.code === "ECONNABORTED") {
+      return res.status(504).json({ error: "Flights request timed out" });
+    }
+
+    return res.status(500).json({ error: "Flight search failed" });
   }
 });
-   //SERVER
 
+// SERVER
 const PORT = process.env.PORT || 3001;
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
