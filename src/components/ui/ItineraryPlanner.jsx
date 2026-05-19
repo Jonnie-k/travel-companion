@@ -9,67 +9,61 @@ import {
   onSnapshot,
   query,
   where,
+  serverTimestamp,
 } from "firebase/firestore";
 
 function ItineraryPlanner() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
   const [activity, setActivity] = useState("");
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Wait for auth to finish before doing anything
+    if (authLoading) return;
+
     let unsubscribe;
 
-    async function initListener() {
-      // If user is not logged in, reset state and exit safely
-      if (!currentUser) {
-        setActivities([]);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-
-        const q = query(
-          collection(db, "itineraries"),
-          where("userId", "==", currentUser.uid)
-        );
-
-        unsubscribe = onSnapshot(
-          q,
-          (snapshot) => {
-            const items = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-
-            setActivities(items);
-            setLoading(false);
-          },
-          (error) => {
-            console.warn(
-              "Itinerary Planner stream offline/unreachable:",
-              error.message
-            );
-
-            setActivities([]);
-            setLoading(false);
-          }
-        );
-      } catch (error) {
-        console.error("Failed to initialize Firestore listener:", error);
-        setActivities([]);
-        setLoading(false);
-      }
+    if (!currentUser) {
+      setActivities([]);
+      setLoading(false);
+      return;
     }
 
-    initListener();
+    try {
+      setLoading(true);
+
+      const q = query(
+        collection(db, "itineraries"),
+        where("userId", "==", currentUser.uid)
+      );
+
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const items = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setActivities(items);
+          setLoading(false);
+        },
+        (error) => {
+          console.warn("Itinerary stream offline/unreachable:", error.message);
+          setActivities([]);
+          setLoading(false);
+        }
+      );
+    } catch (error) {
+      console.error("Failed to initialize Firestore listener:", error);
+      setActivities([]);
+      setLoading(false);
+    }
 
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [currentUser]);
+  }, [currentUser, authLoading]);
 
   async function addActivity() {
     const trimmed = activity.trim();
@@ -79,9 +73,8 @@ function ItineraryPlanner() {
       await addDoc(collection(db, "itineraries"), {
         activity: trimmed,
         userId: currentUser.uid,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       });
-
       setActivity("");
     } catch (error) {
       console.error("Error adding activity:", error);
@@ -114,12 +107,11 @@ function ItineraryPlanner() {
           onChange={(e) => setActivity(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-
         <button onClick={addActivity}>Add</button>
       </div>
 
       <ul className="activity-list">
-        {loading ? (
+        {authLoading || loading ? (
           <p className="empty">Loading activities...</p>
         ) : activities.length === 0 ? (
           <p className="empty">No activities added yet</p>

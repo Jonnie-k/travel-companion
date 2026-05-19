@@ -27,7 +27,7 @@ function Dashboard() {
   const [params] = useSearchParams();
   const city = (params.get("city") || "").trim();
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
 
   const [cityInput, setCityInput] = useState("");
 
@@ -45,7 +45,7 @@ function Dashboard() {
 
   // Load persisted search results from Firestore on mount
   useEffect(() => {
-    if (!currentUser) return;
+    if (loading || !currentUser) return;
 
     async function loadPersistedData() {
       try {
@@ -58,17 +58,14 @@ function Dashboard() {
           if (data.hotelResults) setHotelResults(data.hotelResults);
         }
       } catch (error) {
-        console.warn(
-          "Firestore unavailable. Starting with empty state.",
-          error
-        );
+        console.warn("Firestore unavailable. Starting with empty state.", error);
         setFlightResults([]);
         setHotelResults([]);
       }
     }
 
     loadPersistedData();
-  }, [currentUser]);
+  }, [currentUser, loading]);
 
   // Save results to Firestore
   async function saveResults(flights, hotels) {
@@ -77,7 +74,7 @@ function Dashboard() {
       await setDoc(doc(db, "searchResults", currentUser.uid), {
         flightResults: flights,
         hotelResults: hotels,
-        updatedAt: serverTimestamp(), // fixed: use serverTimestamp
+        updatedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error("Error saving results to Firestore:", error);
@@ -163,6 +160,9 @@ function Dashboard() {
       setHotelLoading(false);
     }
   }
+
+  // Show nothing while auth is loading
+  if (loading) return <Loading message="Loading..." />;
 
   return (
     <div className="dashboard-container">
