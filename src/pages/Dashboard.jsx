@@ -43,6 +43,7 @@ function Dashboard() {
   const [hotelError, setHotelError] = useState("");
 
   // Load persisted from Firestore.
+  // Load persisted from Firestore.
   useEffect(() => {
     if (!currentUser) return;
 
@@ -50,19 +51,24 @@ function Dashboard() {
       try {
         const docRef = doc(db, "searchResults", currentUser.uid);
         const docSnap = await getDoc(docRef);
+        
         if (docSnap.exists()) {
           const data = docSnap.data();
           if (data.flightResults) setFlightResults(data.flightResults);
           if (data.hotelResults) setHotelResults(data.hotelResults);
         }
       } catch (error) {
-        console.error("Error loading persisted data:", error);
+        // 👇 Catching it cleanly prevents the blank white screen of death
+        console.warn("Firestore offline/unavailable. Defaulting to fresh search states.", error);
+        
+        // Fallback: Ensure your application doesn't get stuck in a partial loading trap
+        setFlightResults([]);
+        setHotelResults([]);
       }
     }
 
     loadPersistedData();
   }, [currentUser]);
-
   //Saving results to Firestore 
   async function saveResults(flights, hotels) {
     if (!currentUser) return;

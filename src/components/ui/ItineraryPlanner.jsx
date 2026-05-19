@@ -25,14 +25,26 @@ function ItineraryPlanner() {
       where("userId", "==", currentUser.uid)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const items = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setActivities(items);
-      setLoading(false);
-    });
+    // Added an error callback function as the third argument to onSnapshot
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const items = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setActivities(items);
+        setLoading(false);
+      },
+      (error) => {
+        // Intercepts connection/cache drops gracefully
+        console.warn("Itinerary Planner stream offline/unreachable:", error.message);
+        
+        // Stops the loading screen from spinning indefinitely
+        setActivities([]);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, [currentUser]);
