@@ -19,7 +19,7 @@ function ItineraryPlanner() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Wait for auth to finish before doing anything
+    // Waiting for auth to finish before doing anything
     if (authLoading) return;
 
     let unsubscribe;

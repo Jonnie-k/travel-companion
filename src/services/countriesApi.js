@@ -7,7 +7,7 @@ export async function getCountryByCity(city) {
   const res = await fetch(`${BASE_URL}/capital/${encodeURIComponent(city)}`);
 
   if (!res.ok) {
-    // Fallback: try searching by city as a country name
+    // Fallback,try searching by city as a country name
     const fallback = await fetch(
       `${BASE_URL}/name/${encodeURIComponent(city)}`
     );

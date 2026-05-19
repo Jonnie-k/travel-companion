@@ -43,7 +43,7 @@ function Dashboard() {
   const [hotelLoading, setHotelLoading] = useState(false);
   const [hotelError, setHotelError] = useState("");
 
-  // Load persisted search results from Firestore on mount
+  // Load persisted search results from Firestore 
   useEffect(() => {
     if (loading || !currentUser) return;
 
@@ -67,7 +67,7 @@ function Dashboard() {
     loadPersistedData();
   }, [currentUser, loading]);
 
-  // Save results to Firestore
+  // Saving results to Firestore
   async function saveResults(flights, hotels) {
     if (!currentUser) return;
     try {
@@ -89,7 +89,7 @@ function Dashboard() {
     navigate(`/dashboard?city=${encodeURIComponent(trimmed)}`);
   }
 
-  // Load weather when city changes
+  // Loading weather when city changes
   useEffect(() => {
     if (!city) {
       setWeatherData(null);

@@ -39,7 +39,7 @@ app.get("/hotels", async (req, res) => {
   console.log("Searching hotels:", { city, checkIn, checkOut, adults });
 
   try {
-    // Get destination/region ID
+    //destination search
     const destinationResponse = await axios.get(
       "https://hotels-com-provider.p.rapidapi.com/v2/regions",
       {

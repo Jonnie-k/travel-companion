@@ -1,7 +1,7 @@
 function FlightCard({ flight }) {
-  // Guard against undefined/malformed flight
+  // Guard against undefined flight
   if (!flight || !flight.slices?.length) {
-    return null; // render nothing for bad data
+    return null; 
   }
 
   const slice = flight.slices[0];
